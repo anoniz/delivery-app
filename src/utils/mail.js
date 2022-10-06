@@ -5,12 +5,12 @@ const smtp = process.env.SMTP
 const pass = process.env.PASSWORD
   let transporter = nodemailer.createTransport({
     host: smtp,
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
       auth : {
         user: from_email,
         pass: pass
-      }
+      } 
   });
 
 
