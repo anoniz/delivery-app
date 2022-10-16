@@ -1,16 +1,42 @@
 # delivery-app
 
+## Clone the repository
+```bash
+git clone https://github.com/mibrahimniz/nodejs-task.git
+```
 
-# clone the project and run 'npm install' from root folder (delivery-app)
+## Installation of dependencies
 
-# create related database and put user password in database.js file..
+```bash
+npm install
+```
 
-# create .env file and put variable as mentioned in sampleENV file..
+## Running the application
 
-# now run the src/index.js and go to 127.0.0.1:3000 to see the server running..
+```bash
+# Create database in postgres DB
+# Check required environment variables in sample.env and place them into .env file
+```
 
-# explore and test the app with postman or related tool.. its only back-end..
+```bash
+# Run the application server
+node src/index.js
+```
 
-# i will add more front-end and more feature soon.. 
-
-# if you can do it for me , more than welcome , please suggest more feature also.
+```bash
+# Start hitting the APIs
+# To add sign up
+[your IP/localhost]:3000/signup
+# To log in
+[your IP/localhost]:3000/login
+# To update user 
+[your IP/localhost]:3000/update-user/
+# To remove user
+[your IP/localhost]:3000/remove-user/
+# To show all users
+[your IP/localhost]:3000/show-all-users/
+# To see all logins
+[your IP/localhost]:3000/show-all-logins
+# To get user by id
+[your IP/localhost]:3000/get-user-by-id/
+```
