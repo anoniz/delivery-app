@@ -1,0 +1,7 @@
+#JWT Secret
+SECRET = TypeAnySecretYouWant
+
+#SMTP Credentials
+SMTP = Your SMTP service...
+FROM_EMAIL = your from email you want to send emails
+PASSWORD = that email's password...
