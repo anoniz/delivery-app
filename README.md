@@ -2,7 +2,7 @@
 
 ## Clone the repository
 ```bash
-git clone https://github.com/mibrahimniz/nodejs-task.git
+https://github.com/anoniz/delivery-app.git
 ```
 
 ## Installation of dependencies
