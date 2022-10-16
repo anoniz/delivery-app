@@ -3,7 +3,7 @@ const {Users} = require('../models/userModel');
 
 const signup = async function (user) {
     try {
-        Users.create(user)
+         Users.create(user);
     } catch (err) {
         return {err: {message: "Something went wrong, try again", code: 500}};
     }

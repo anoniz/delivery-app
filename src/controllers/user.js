@@ -23,8 +23,6 @@ const verify = async (req,res) => {
 }
 
 
-
-
 const signup = async(req, res) => {
     const {username,email,password,isAdmin,} = req.body;
     const checkEmail = await userService.getByEmail(email); 
@@ -44,7 +42,7 @@ const signup = async(req, res) => {
         message:null,
         isAdmin,
     }
-      userService.signup(user)
+      userService.signup(user);
       const sendMail = authService.sendEmail(email,username)
       if(sendMail.err) return res.send(sendMail.err);
       else return res.status(200).send({message : "Verification link has been sent"})
@@ -76,23 +74,24 @@ const logIn = async (req,res) => {
 
 const allLogins = async(req, res) => {
     try {
-        const token = req.headers.token
-        const isAdmin = authService.adminToken(token)
-        if(isAdmin) return res.status(200).send(await userService.showAllLogins())
-        else return res.status(403).send({message: 'unathorized token'})
+        const token = req.headers.token;
+        const isAdmin = authService.adminToken(token);
+        if(isAdmin) return res.status(200).send(await userService.showAllLogins());
+        else return res.status(403).send({message: 'unathorized token'});
     } catch (err) {
-        return res.status(403).send({message: 'invalid or expired token'})
+        return res.status(403).send({message: 'invalid or expired token'});
     }
   
 }
 
 const allUsers = async(req, res) => {
     try {
-        const token = req.headers.token
-        const isAdmin = authService.adminToken(token);
-        const users = await userService.showAllUsers();
-        // console.log(users);
-        if(isAdmin) return res.status(200).send(users)
+        const token = req.headers.token;
+        const isAdmin = authService.adminToken(token); 
+        if(isAdmin) {
+            const users = await userService.showAllUsers();
+            return res.status(200).send(users)
+        } 
         else return res.status(403).send({message: 'unathorized token'})
     } catch (err) {
         console.log(err);
@@ -105,8 +104,9 @@ const makeUser = (req, res) => {
     try {
     const userToken = req.headers.token
     const id = req.params.id;
-    const result = authService.verifyToken(userToken)
-    const tokenId = result.id
+    const resp = authService.verifyToken(userToken);
+    if (resp.error) return res.status(resp.error.code).send(resp.error.message);
+    const tokenId = resp.payload.id;
     if(id != tokenId) return res.status(403).send({message:'invalid token or ID'})
 
     const {username,age,nickName,country,city,message} = req.body
@@ -124,10 +124,12 @@ const makeUser = (req, res) => {
 
 const getUserById = async(req, res) => {
     try {
-    const id = req.params.id
-    const token = req.headers.token
-    const payload = authService.verifyToken(token)
-    const tokenId = payload.id
+    const id = req.params.id;
+    const userToken = req.headers.token;
+    const resp = authService.verifyToken(userToken);
+    if (resp.error) return res.status(resp.error.code).send(resp.error.message);
+    console.log(resp.payload);
+    const tokenId = resp.payload.id;
 
     const user = await userService.getUserById(id)
     if(id != tokenId) return res.status(403).send({message:'invalid token or ID'})
@@ -143,11 +145,13 @@ const getUserById = async(req, res) => {
 
 const removeUser = async(req, res) => {
     try {
-        const id = req.params.id
-        const token = req.headers.token
-        const payload = authService.verifyToken(token)
-        const tokenId = payload.id
-        const isAdmin = authService.adminToken(token)
+        const id = req.params.id;
+        const userToken = req.headers.token;
+        const resp = authService.verifyToken(userToken);
+        if (resp.error) return res.status(resp.error.code).send(resp.error.message);
+        console.log(resp.payload);
+        const tokenId = resp.payload.id
+        const isAdmin = authService.adminToken(userToken)
         if(!isAdmin) 
         if(id != tokenId) return res.status(403).send({message:'Invalid id or token'})
         const user = await userService.removeUser(id);

@@ -10,7 +10,22 @@ const token = function (payload) {
 };
 
 const verifyToken = function (userToken) {
-  return jwt.verify(userToken, key);
+
+  try{
+     const payload = jwt.verify(userToken, key,(err,decode) => {
+      if(err) {
+        console.log(err.name," : ",err.message);
+      } 
+      else console.log(decode);
+     });
+    
+    if(!payload) return {error: {message: "unauthorized or invalid token", code: 403}};
+    return {payload}
+    }catch(error){
+    // console.log(error);
+    return {error: {message: "Something went wrongg, try again", code: 500}};
+}
+  
 };
 
 const adminToken = (token) => {
