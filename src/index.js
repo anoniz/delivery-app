@@ -7,11 +7,9 @@ const {userRoutes} = require('./routes/index');
 
 app.use('/',userRoutes.router);
 
-// sequelize.sync({alter : true}).then(() => {
-//     console.log("success");
-// }).catch(err => console.log(err + "  => somethig is wrong"));
-
-
+sequelize.sync({alter : true}).then(() => {
+    console.log("success");
+}).catch(err => console.log(err + "  => somethig is wrong"));
 
 
 

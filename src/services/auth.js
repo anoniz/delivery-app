@@ -19,11 +19,11 @@ const verifyToken = function (userToken) {
       else console.log(decode);
      });
     
-    if(!payload) return {error: {message: "unauthorized or invalid token", code: 403}};
+    if(!payload) return {err: {message: "unauthorized or invalid token", code: 403}};
     return {payload}
-    }catch(error){
+    }catch(err){
     // console.log(error);
-    return {error: {message: "Something went wrongg, try again", code: 500}};
+    return {err: {message: "Something went wrongg, try again", code: 500}};
 }
   
 };
@@ -47,8 +47,8 @@ const sendEmail = async (email,name) => {
   const message = {
     from: from_email,
     to: email,
-    subject: " i am nodemailer",
-    text: "click below link to confirm!!",
+    subject: " I Am NodeMailer",
+    text: "Click Below Link to Confirm!!",
     html: `<h1>Email Confirmation</h1>
     <h2>Hello ${name}</h2>
     <h3>Thank you for subscribing. Please confirm your email by clicking on the following link</h3>

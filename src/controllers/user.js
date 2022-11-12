@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const rootPage = (req,res) => res.send('its working')
 const {userService,authService} = require('../services/index');
-
+var checkStatus = "pending";
 const verify = async (req,res) => {
     console.log(typeof(req.params.code))
     const confirmationCode = req.params.code;
@@ -9,7 +9,8 @@ const verify = async (req,res) => {
     const {id,email,isAdmin} = user;
 
     if(email == confirmationCode) {
-        user.status = "active"
+        user.status = "active";
+        // checkStatus = "active";
       const updateStatus =  await userService.updateUser(id,user)
       console.log(updateStatus)
       
@@ -22,11 +23,26 @@ const verify = async (req,res) => {
       }
 }
 
+const deletePendingUsers = async (email) => {
+     const time = 10000*6*4;
+     setTimeout( async() => {
+       const user = await userService.getByEmail(email);
+       if(user.status == "pending") {
+        const user1 = await userService.removeUser(user.id);
+        if(user1 == null) console.log("No User With Status Pending Exist in DB.")
+        else console.log("User With Status Pending Deleted...");
+       }
+
+     },time);
+}
 
 const signup = async(req, res) => {
     const {username,email,password,isAdmin,} = req.body;
-    const checkEmail = await userService.getByEmail(email); 
-    if(checkEmail != null) return res.send("email already exits")
+    const resp = await userService.getByEmail(email); 
+    console.log(resp);
+    if(resp != null && resp.err) return res.status(resp.err.code).send(resp.err.message);
+    if(resp != null) return res.status(403).send({message:"email already exits"});
+    
     
     const hash = await authService.hashPassword(password);
 
@@ -42,12 +58,19 @@ const signup = async(req, res) => {
         message:null,
         isAdmin,
     }
-      userService.signup(user);
-      const sendMail = authService.sendEmail(email,username)
+      await userService.signup(user);
+      checkStatus = email;
+      const sendMail = await authService.sendEmail(email,username)
       if(sendMail.err) return res.send(sendMail.err);
       else return res.status(200).send({message : "Verification link has been sent"})
      
 }
+
+setTimeout(() => {
+   if(checkStatus != "pending") {
+    deletePendingUsers(checkStatus);
+   }
+},9000);
 
 const logIn = async (req,res) => {
     const {email, pass} = req.body;
