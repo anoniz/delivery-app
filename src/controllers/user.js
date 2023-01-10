@@ -23,8 +23,7 @@ const verify = async (req,res) => {
       }
 }
 
-const pendingUsers = [{time:1,email:"a"},{time:2,email:"b"},{time:3,email:"c"}];
-
+const pendingUsers = [];
 
 const signup = async(req, res) => {
     const {username,email,password,isAdmin,} = req.body;
@@ -38,7 +37,7 @@ const signup = async(req, res) => {
     const id = uuidv4()
     const user = {
         id,username,password:hash,
-        email,
+        email:email,
         status : "pending",
         age:null,
         nickname:null, 
@@ -51,7 +50,7 @@ const signup = async(req, res) => {
       const sendMail = await authService.sendEmail(email,username);
       if(sendMail.err) return res.send(sendMail.err);
       else {
-         const mail = {time:10,email:email};
+         const mail = {time:1,email:email};
          pendingUsers.push(mail);
          
         return res.status(200).send({message : "Verification link has been sent"});
@@ -72,18 +71,21 @@ const decrease = async (pendingUsers) => {
 
 
 const del = async (pendingUsers) => {
+    setTimeout(() => {
     if(pendingUsers.length) {
         decrease(pendingUsers);
-      setTimeout(() => {
-        const user = userService.getByEmail(pendingUsers[0].email);
-        userService.removeUser(user.id);
+      setTimeout(async () => {
+        console.log(pendingUsers[0].email);
+        const user = await userService.getByEmail(pendingUsers[0].email);
+        await userService.removeUser(user.id);
         
-         del(pendingUsers);
       }, pendingUsers[0].time * 60000);
     }
       else {
         console.log("No pending Users In DB ");
-      }
+      }   del(pendingUsers);
+
+    }, 60000);
 }
 del(pendingUsers);
 
