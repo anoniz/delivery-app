@@ -67,7 +67,6 @@ const removeUser = async function (id) {
 
 
 
-
 module.exports = {
     signup,
     showAllLogins,

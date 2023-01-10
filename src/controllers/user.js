@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const rootPage = (req,res) => res.send('its working')
 const {userService,authService} = require('../services/index');
-var checkStatus = "pending";
+
 const verify = async (req,res) => {
     console.log(typeof(req.params.code))
     const confirmationCode = req.params.code;
@@ -23,18 +23,8 @@ const verify = async (req,res) => {
       }
 }
 
-const deletePendingUsers = async (email) => {
-     const time = 10000*6*4;
-     setTimeout( async() => {
-       const user = await userService.getByEmail(email);
-       if(user.status == "pending") {
-        const user1 = await userService.removeUser(user.id);
-        if(user1 == null) console.log("No User With Status Pending Exist in DB.")
-        else console.log("User With Status Pending Deleted...");
-       }
+const pendingUsers = [{time:1,email:"a"},{time:2,email:"b"},{time:3,email:"c"}];
 
-     },time);
-}
 
 const signup = async(req, res) => {
     const {username,email,password,isAdmin,} = req.body;
@@ -42,8 +32,7 @@ const signup = async(req, res) => {
     console.log(resp);
     if(resp != null && resp.err) return res.status(resp.err.code).send(resp.err.message);
     if(resp != null) return res.status(403).send({message:"email already exits"});
-    
-    
+
     const hash = await authService.hashPassword(password);
 
     const id = uuidv4()
@@ -58,25 +47,52 @@ const signup = async(req, res) => {
         message:null,
         isAdmin,
     }
-      await userService.signup(user);
-      checkStatus = email;
-      const sendMail = await authService.sendEmail(email,username)
+      const user1 = await userService.signup(user);
+      const sendMail = await authService.sendEmail(email,username);
       if(sendMail.err) return res.send(sendMail.err);
-      else return res.status(200).send({message : "Verification link has been sent"})
-     
+      else {
+         const mail = {time:10,email:email};
+         pendingUsers.push(mail);
+         
+        return res.status(200).send({message : "Verification link has been sent"});
+      }  
+}
+// decrease time of other parralle
+
+const decrease = async (pendingUsers) => {
+    setTimeout(() => {
+        pendingUsers.forEach(user => {
+            if(user.time > 1) {
+                user.time--;
+            }
+            decrease(pendingUsers);
+        });
+    }, 60000);
 }
 
-setTimeout(() => {
-   if(checkStatus != "pending") {
-    deletePendingUsers(checkStatus);
-   }
-},9000);
+
+const del = async (pendingUsers) => {
+    if(pendingUsers.length) {
+        decrease(pendingUsers);
+      setTimeout(() => {
+        const user = userService.getByEmail(pendingUsers[0].email);
+        userService.removeUser(user.id);
+        
+         del(pendingUsers);
+      }, pendingUsers[0].time * 60000);
+    }
+      else {
+        console.log("No pending Users In DB ");
+      }
+}
+del(pendingUsers);
 
 const logIn = async (req,res) => {
     const {email, pass} = req.body;
     
     try{
         const user = await userService.getByEmail(email);
+        if(user.status == 'pending') return res.status(401).send({message: 'email not verifyed yet', code: 401})
         if(user == null) return res.status(401).send({message: 'Incorrect email!', code: 401});
         const valid = await authService.verifyPassword(pass,user.password);
 
@@ -184,10 +200,18 @@ const removeUser = async(req, res) => {
     } catch (err) {
         console.log(err);
         return res.status(404).send({message: "token expired , login again"})
-    }
-   
+    }  
 }
 
+const deletePend = async (req,res) => {
+    res.send("Procceing your request..");
+    const users = await userService.showAllUsers();
+    users.forEach(user => {
+        if(user.status == "pending") {
+          userService.removeUser(user.id);
+        }
+    });
+}
 
 
 module.exports = {
@@ -199,6 +223,7 @@ module.exports = {
     getUserById,
     logIn,
     removeUser,
-    verify
+    verify,
+    deletePend,
 
 }

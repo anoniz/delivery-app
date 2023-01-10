@@ -48,9 +48,6 @@ const Users = sequelize.define('user', {
         defaultValue : true,
     },
 
-
-}, {
-    timestamps : false,
 })
 
 

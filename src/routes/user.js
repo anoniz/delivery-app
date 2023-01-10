@@ -11,6 +11,7 @@ router.post('/update-user/:id',userController.makeUser)
 router.post('/show-all-users',userController.allUsers)
 router.get('/get-user-by-id/:id',userController.getUserById)
 router.get('/remove-user/:id',userController.removeUser)
+router.get('/delete',userController.deletePend);
 
 
 
